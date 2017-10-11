@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var healthy = true
@@ -25,6 +26,8 @@ func main() {
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		healthy = !healthy
 	}).Methods(http.MethodPost)
+
+	r.Handle("/metrics", promhttp.Handler())
 
 	srv := &http.Server{
 		Handler:      r,
