@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -14,7 +15,16 @@ var healthy = true
 func main() {
 	r := mux.NewRouter()
 
-	r.Handle("/", http.FileServer(http.Dir("/www")))
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		hostname, err := os.Hostname()
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write([]byte(hostname))
+		}
+	}).Methods(http.MethodGet)
+
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if healthy {
 			w.Write([]byte("healthy"))
