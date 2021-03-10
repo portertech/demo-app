@@ -8,13 +8,13 @@ pattern for Kubernetes `readinessProbe` and `livenessProbe` checks.
 1. Clone this repo
 
    ```
-   $ git clone git@github.com:portertech/dummy.git dummy
+   $ git clone git@github.com:portertech/demo-app.git demo-app
    ```
 
-2. Compile a statically linked binary of the dummy app
+2. Compile a statically linked binary of the demo-app app
 
    ```
-   $ cd dummy
+   $ cd demo-app
    $ CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' .
    ```
 
@@ -23,7 +23,7 @@ pattern for Kubernetes `readinessProbe` and `livenessProbe` checks.
 3. Build a Docker image
 
    ```
-   $ docker build -t dummy:latest .
+   $ docker build -t demo-app:latest .
    ```
 
    _NOTE: Installing docker and general help around building Docker containers
@@ -32,7 +32,7 @@ pattern for Kubernetes `readinessProbe` and `livenessProbe` checks.
 4. Run the container
 
    ```
-   $ docker run -p 8080:8080 -t dummy:latest
+   $ docker run -p 8080:8080 -t demo-app:latest
    ```
 
 5. Query the web app using curl to observe it running:
