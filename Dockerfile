@@ -1,8 +1,8 @@
 FROM alpine:latest
 
 RUN apk --no-cache add curl
-COPY dummy /usr/bin/dummy
+COPY demo-app /usr/bin/demo-app
 
 EXPOSE 8080
 
-CMD ["/usr/bin/dummy"]
+CMD ["/usr/bin/demo-app"]

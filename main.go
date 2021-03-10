@@ -14,7 +14,7 @@ import (
 var healthy = true
 
 func main() {
-	prefix := "dummy."
+	prefix := "demo-app."
 	statsdclient := statsd.NewStatsdClient("127.0.0.1:8125", prefix)
 	err := statsdclient.CreateSocket()
 	if nil != err {
