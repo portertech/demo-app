@@ -21,11 +21,14 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
+	interval := time.Second * 5
+	stats := statsd.NewStatsdBuffer(interval, statsdclient)
+	defer stats.Close()
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		statsdclient.Incr("http.requests.get.root", 1)
+		stats.Incr("http.requests.get.root", 1)
 
 		hostname, err := os.Hostname()
 
@@ -37,7 +40,7 @@ func main() {
 	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		statsdclient.Incr("http.requests.get.healthz", 1)
+		stats.Incr("http.requests.get.healthz", 1)
 
 		if healthy {
 			w.Write([]byte("healthy"))
@@ -47,7 +50,7 @@ func main() {
 	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		statsdclient.Incr("http.requests.post.healthz", 1)
+		stats.Incr("http.requests.post.healthz", 1)
 
 		healthy = !healthy
 	}).Methods(http.MethodPost)

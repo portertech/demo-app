@@ -1,4 +1,4 @@
-## What is this?
+v## What is this?
 
 A simple Golang web app that demonstrates the HTTP `GET /healthz` endpoint
 pattern for Kubernetes `readinessProbe` and `livenessProbe` checks.
