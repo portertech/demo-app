@@ -1,17 +1,26 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/quipo/statsd"
 )
 
 var healthy = true
+
+var db_host = os.Getenv("DB_HOST")
+var db_port = os.Getenv("DB_PORT")
+var db_user = os.Getenv("DB_USER")
+var db_pass = os.Getenv("DB_PASS")
+var db_name = os.Getenv("DB_NAME")
 
 func main() {
 	prefix := "demo-app."
@@ -24,6 +33,13 @@ func main() {
 	interval := time.Second * 5
 	stats := statsd.NewStatsdBuffer(interval, statsdclient)
 	defer stats.Close()
+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", db_host, db_port, db_user, db_pass, db_name)
+	db, err := sql.Open("postgres", psqlconn)
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
 
 	r := mux.NewRouter()
 
@@ -42,6 +58,12 @@ func main() {
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		stats.Incr("http.requests.get.healthz", 1)
 
+		err = db.Ping()
+		if err != nil {
+			healthy = false
+			log.Println(err)
+		}
+
 		if healthy {
 			w.Write([]byte("healthy"))
 		} else {
@@ -52,7 +74,13 @@ func main() {
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		stats.Incr("http.requests.post.healthz", 1)
 
-		healthy = !healthy
+		err = db.Ping()
+		if err != nil {
+			healthy = false
+			log.Println(err)
+		} else {
+			healthy = !healthy
+		}
 	}).Methods(http.MethodPost)
 
 	r.Handle("/metrics", promhttp.Handler())
